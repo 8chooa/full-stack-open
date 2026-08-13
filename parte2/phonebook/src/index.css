@@ -1,0 +1,16 @@
+.successful__message, .message {
+    border: 3px solid green;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 1.5rem;
+    background-color: lightgrey;
+    color: green;
+    margin-bottom: 15px;
+    box-shadow: 1px 1px 5px 0px green;
+}
+
+.error__message {
+    border-color: red;
+    color: red;
+    box-shadow: 1px 1px 5px 0px red;
+}

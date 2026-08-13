@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import personsService from './services/persons'
+import './index.css'
 
 const Filter = ({ filter, handleFilterChange }) => {
     return (
-        <input value={filter} onChange={handleFilterChange} />
+        <div>filter shown with <input value={filter} onChange={handleFilterChange} /></div>
     )
 }
 
@@ -45,11 +46,31 @@ const Contact = ({ person, handleDelete }) => {
     )
 }
 
+const Notification = ({ message }) => {
+    if(message === null) {
+        return null
+    }
+    return (
+        <div className='message successful__message'>{message}</div>
+    )
+}
+
+const ErrorNotification = ({ message }) => {
+    if(message === null) {
+        return null
+    }
+    return (
+        <div className='message error__message'>{message}</div>
+    )
+}
+
 const App = () => {
     const [ persons, setPersons ] = useState([])
     const [ newName, setNewName ] = useState('')
     const [ newNumber, setNewNumber ] = useState('')
     const [ filter, setFilter ] = useState('')
+    const [ message, setMessage ] = useState(null)
+    const [ errorMessage, setErrorMessage ] = useState(null)
 
     useEffect(() => {
         personsService.getAll().then(data => {
@@ -75,18 +96,25 @@ const App = () => {
                 console.log('aceptaste la accion de actualizar contacto')
                 personsService.updatePerson(findPerson.id, newPerson).then(data => {
                     setPersons(persons.map(person => person.id === findPerson.id ? data : person))
-                    console.log('actualizado el numero de ', newPerson.name)
+                    setMessage(`updated ${data.name}`)
+                    setTimeout(() => setMessage(null), 5000)
+                    setNewName('')
+                    setNewNumber('')
+                }).catch(error => {
+                    setErrorMessage(`Information of ${findPerson.name} has already removed from server`)
+                    setTimeout(() => setErrorMessage(null), 5000)
                 })
             } 
         } else {
             personsService.create(newPerson)
             .then(personCreated => {
                 setPersons(persons.concat(personCreated))
-                
+                setMessage(`Added ${personCreated.name}`)
+                setTimeout(() => setMessage(null), 5000)
+                setNewName('')
+                setNewNumber('')
             })
         }
-        setNewName('')
-        setNewNumber('')
     }
 
     const contactToShow = persons.filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
@@ -96,8 +124,12 @@ const App = () => {
         if(window.confirm(`Delete ${finedPerson.name} ?`)) {
             personsService.deletePerson(id).then(dataDeleted => { 
                 setPersons(persons.filter(person => person.id !== id))
-                alert(`se elimino correctamente a ${dataDeleted.name}`)
+                console.log(dataDeleted)
+                alert(`se elimino correctamente a ${finedPerson.name}`)
 
+            }).catch(error => {
+                setErrorMessage(`Information of ${findPerson.name} has already removed from server`)
+                setTimeout(() => setErrorMessage(null), 5000)
             })
         }
     }
@@ -105,6 +137,8 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={message} />
+            <ErrorNotification message={errorMessage} />
             <Filter filter={filter} handleFilterChange={handleFilterChange} />
             <h3>add a new</h3>
             <PersonForm onSubmitForm={addPerson} name={newName} onNameChange={handleNameChange} number={newNumber} onNumberChange={handleNumberChange}/>
