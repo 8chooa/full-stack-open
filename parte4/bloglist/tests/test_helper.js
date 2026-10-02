@@ -1,4 +1,10 @@
 const Blog = require('../models/blog');
+const User = require('../models/user');
+
+async function getId() {
+  const user = await User.findOne({});
+  return user._id;
+}
 
 const initialBlogs = [
   {
